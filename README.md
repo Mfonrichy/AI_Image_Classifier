@@ -112,6 +112,9 @@ the FastAPI application. Set `FRONTEND_ORIGINS` to the Vercel origin from step
 1, with no trailing slash. The model file must remain committed at
 `model/cat_dog_neither_model.keras`.
 
+The root-level `.python-version` pins Render to Python 3.13.4, which is
+compatible with the TensorFlow version pinned by the backend.
+
 Once deployed, check `https://<your-render-service>.onrender.com/health`. It
 should return `{"status":"ok"}` after the service starts and loads the model.
 
