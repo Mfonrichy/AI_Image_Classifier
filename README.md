@@ -88,6 +88,51 @@ URL, create `frontend\.env.local` with:
 VITE_API_BASE_URL=http://localhost:8000
 ```
 
+## Deploy to Vercel and Render
+
+The React frontend is deployed to Vercel, and the FastAPI API and saved model
+are deployed together to Render.
+
+### 1. Deploy the frontend to Vercel
+
+Import the GitHub repository into Vercel and set the project **Root Directory**
+to `frontend`. Vercel detects Vite; the project builds with `npm run build` and
+outputs to `dist`. The `frontend/vercel.json` file enables client-side routing.
+Vite 7 requires Node.js 20.19+ or 22.12+; select a compatible version in the
+Vercel project settings if needed.
+
+After the first deployment, note the public Vercel origin, for example
+`https://your-project.vercel.app` (no trailing slash).
+
+### 2. Deploy the API to Render
+
+Create a new **Blueprint** in Render and select this repository. Render reads
+the root-level `render.yaml` to install `backend/requirements.txt` and start
+the FastAPI application. Set `FRONTEND_ORIGINS` to the Vercel origin from step
+1, with no trailing slash. The model file must remain committed at
+`model/cat_dog_neither_model.keras`.
+
+Once deployed, check `https://<your-render-service>.onrender.com/health`. It
+should return `{"status":"ok"}` after the service starts and loads the model.
+
+### 3. Connect the frontend to the API
+
+In Vercel, open the project’s **Settings → Environment Variables** and add:
+
+```text
+VITE_API_BASE_URL=https://<your-render-service>.onrender.com
+```
+
+Apply it to the desired environments and redeploy the frontend. The value
+should not have a trailing slash. If you use a custom Vercel domain, add that
+domain’s origin to Render’s comma-separated `FRONTEND_ORIGINS` environment
+variable as well.
+
+The Render Blueprint uses the free instance plan. Free instances may spin down
+when idle, so the first request can take longer. If the service runs out of
+memory while loading TensorFlow or making predictions, upgrade it to an
+instance with more memory.
+
 ## Prediction pipeline
 
 The FastAPI backend validates the upload, opens it as RGB, resizes it to
